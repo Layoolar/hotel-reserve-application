@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 public class ReservationService {
 
     private static final ReservationService INSTANCE = new ReservationService();
+    private static final int DEFAULT_PLUS_DAYS = 7;
 
     private final Map<String, IRoom> rooms = new HashMap<>();
     private final Map<String, Collection<Reservation>> reservations = new HashMap<>();
@@ -68,6 +69,14 @@ public class ReservationService {
                 .collect(Collectors.toList());
     }
 
+    public Date addDefaultPlusDays(final Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DATE, DEFAULT_PLUS_DAYS);
+
+        return calendar.getTime();
+    }
+
 
     private boolean reservationOverlaps(final Reservation reservation, final Date checkInDate,
                                         final Date checkOutDate){
@@ -77,6 +86,10 @@ public class ReservationService {
 
     public Collection<Reservation> getCustomersReservation(final Customer customer) {
         return reservations.get(customer.getEmail());
+    }
+
+    public Collection<IRoom> findAlternativeRooms(final Date checkInDate, final Date checkOutDate) {
+        return findAvailableRooms(addDefaultPlusDays(checkInDate), addDefaultPlusDays(checkOutDate));
     }
 
     public void printAllReservation() {

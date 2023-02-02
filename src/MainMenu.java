@@ -5,6 +5,7 @@ import model.reservation.Reservation;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Scanner;
@@ -59,11 +60,18 @@ public class MainMenu {
           }
      }
 
+     public static Date addDays(final Date date) {
+          Calendar calendar = Calendar.getInstance();
+          calendar.setTime(date);
+          calendar.add(Calendar.DATE, 7);
+
+          return calendar.getTime();
+     }
 
 
      private static void findAndReserveARoom(Scanner scanner) {
           scanner.nextLine();
-          System.out.println("Please enter your email:");
+          System.out.println("Please enter your email: e.g name@domain.com");
           String email = scanner.nextLine();
           Customer customer = hotelResource.getCustomer(email);
           if (customer == null) {
@@ -72,20 +80,21 @@ public class MainMenu {
           }
 
           System.out.println("Please enter check-in date (MM/dd/yyyy):");
-//          String checkInString = scanner.nextLine();
-//          Date checkIn = parseInputDate(checkInString);
-          final Date checkIn = enterDate(scanner);
-//          if (checkIn == null) {
-//               System.out.println("Invalid format. Please enter check-in date (MM/dd/yyyy):");
-//               return;
-//          }
+          Date checkIn = enterDate(scanner);
 
           System.out.println("Please enter check-out date (MM/dd/yyyy):");
-//          String checkOutString = scanner.nextLine();
-//          Date checkOut = parseInputDate(checkOutString);
-          final Date checkOut = enterDate(scanner);
+          Date checkOut = enterDate(scanner);
 
           Collection<IRoom> availableRooms = hotelResource.findARoom(checkIn, checkOut);
+          int numAttempts = 0;
+          final int maxAttempts = 5;
+          while (availableRooms.isEmpty() && numAttempts < maxAttempts) {
+               checkIn = addDays(checkIn);
+               checkOut = addDays(checkOut);
+               availableRooms = hotelResource.findARoom(checkIn, checkOut);
+               numAttempts++;
+          }
+
           if (availableRooms.isEmpty()) {
                System.out.println("Sorry, no rooms are available for the specified dates.");
                return;
@@ -93,7 +102,7 @@ public class MainMenu {
 
           System.out.println("Available Rooms:");
           for (IRoom room : availableRooms) {
-               System.out.println(room.getRoomNumber());
+               System.out.println("Room Number" + room.getRoomNumber() + " Check In: " + checkIn + " CheckOut: " + checkOut);
           }
 
           System.out.println("Please enter the room number:");
@@ -104,13 +113,201 @@ public class MainMenu {
                return;
           }
 
+          boolean roomFound = false;
+          for (IRoom availableRoom : availableRooms) {
+               if (availableRoom.getRoomNumber().equals(roomNumber)) {
+                    roomFound = true;
+                    break;
+               }
+          }
+          if (!roomFound) {
+               System.out.println("Entered room number is not available. Please try again.");
+               return;
+          }
+
           Reservation reservation = hotelResource.bookARoom(customer.getEmail(), room, checkIn, checkOut);
           System.out.println("Room successfully booked! Room Details: " + reservation);
      }
 
+
+
+
+//     private static void findAndReserveARoom(Scanner scanner) {
+//          scanner.nextLine();
+//          System.out.println("Please enter your email: e.g name@domain.com");
+//          String email = scanner.nextLine();
+//          Customer customer = hotelResource.getCustomer(email);
+//          if (customer == null) {
+//               System.out.println("No customer found with that email. Please create an account first.");
+//               return;
+//          }
+//
+//          System.out.println("Please enter check-in date (MM/dd/yyyy):");
+//          final Date checkIn = enterDate(scanner);
+//
+//          System.out.println("Please enter check-out date (MM/dd/yyyy):");
+//          final Date checkOut = enterDate(scanner);
+//
+//          Collection<IRoom> availableRooms = hotelResource.findARoom(checkIn, checkOut);
+//          if (availableRooms.isEmpty()) {
+//               availableRooms = hotelResource.findARoom(addDays(checkIn), addDays(checkOut));
+//
+//               if (availableRooms.isEmpty()) {
+//                    System.out.println("Sorry, no rooms are available for the specified dates.");
+//                    return;
+//               }
+//               return;
+//
+//
+//          }
+//
+//          System.out.println("Available Rooms:");
+//          for (IRoom room : availableRooms) {
+//               System.out.println(room.getRoomNumber());
+//          }
+//
+//          System.out.println("Please enter the room number:");
+//          String roomNumber = scanner.nextLine();
+//          IRoom room = hotelResource.getRoom(roomNumber);
+//          if (room == null) {
+//               System.out.println("Invalid room number. Please try again.");
+//               return;
+//          }
+//
+//          boolean roomFound = false;
+//          for (IRoom availableRoom : availableRooms) {
+//               if (availableRoom.getRoomNumber().equals(roomNumber)) {
+//                    roomFound = true;
+//                    break;
+//               }
+//          }
+//          if (!roomFound) {
+//               System.out.println("Entered room number is not available. Please try again.");
+//               return;
+//          }
+//
+//          Reservation reservation = hotelResource.bookARoom(customer.getEmail(), room, checkIn, checkOut);
+//          System.out.println("Room successfully booked! Room Details: " + reservation);
+//     }
+
+
+
+
+//     private static void findAndReserveARoom(Scanner scanner) {
+//          scanner.nextLine();
+//          System.out.println("Please enter your email: e.g name@domain.com");
+//          String email = scanner.nextLine();
+//          Customer customer = hotelResource.getCustomer(email);
+//          if (customer == null) {
+//               System.out.println("No customer found with that email. Please create an account first.");
+//               return;
+//          }
+//
+//          System.out.println("Please enter check-in date (MM/dd/yyyy):");
+//          final Date checkIn = enterDate(scanner);
+//
+//          System.out.println("Please enter check-out date (MM/dd/yyyy):");
+//          final Date checkOut = enterDate(scanner);
+//
+//          Collection<IRoom> availableRooms = hotelResource.findARoom(checkIn, checkOut);
+//          if (availableRooms.isEmpty()) {
+//               Collection<IRoom> alternateRooms = hotelResource.findAlternativeRooms(checkIn, checkOut);
+//               if (alternateRooms.isEmpty()) {
+//                    System.out.println("Sorry, no rooms are available for the specified dates.");
+//                    return;
+//               } else {
+//                    final Date alternativeCheckIn = hotelResource.addDefaultPlusDays(checkIn);
+//                    final Date alternativeCheckOut = hotelResource.addDefaultPlusDays(checkOut);
+//                    System.out.println("We've only found rooms on alternative dates:" +
+//                            "\nCheck-In Date:" + alternativeCheckIn +
+//                            "\nCheck-Out Date:" + alternativeCheckOut);
+//
+//                    printRooms(alternateRooms);
+//                    reserveRoom(scanner, alternativeCheckIn, alternativeCheckOut, alternateRooms);
+//               }
+//
+//
+//          }
+//
+//          System.out.println("Available Rooms:");
+//          for (IRoom room : availableRooms) {
+//               System.out.println(room.getRoomNumber());
+//          }
+//
+//          System.out.println("Please enter the room number:");
+//          String roomNumber = scanner.nextLine();
+//          IRoom room = hotelResource.getRoom(roomNumber);
+//          if (room == null) {
+//               System.out.println("Invalid room number. Please try again.");
+//               return;
+//          }
+//
+//          boolean roomFound = false;
+//          for (IRoom availableRoom : availableRooms) {
+//               if (availableRoom.getRoomNumber().equals(roomNumber)) {
+//                    roomFound = true;
+//                    break;
+//               }
+//          }
+//          if (!roomFound) {
+//               System.out.println("Entered room number is not available. Please try again.");
+//               return;
+//          }
+//
+//          Reservation reservation = hotelResource.bookARoom(customer.getEmail(), room, checkIn, checkOut);
+//          System.out.println("Room successfully booked! Room Details: " + reservation);
+//     }
+
+//     private static void findAndReserveARoom(Scanner scanner) {
+//          scanner.nextLine();
+//          System.out.println("Please enter your email: e.g name@domain.com");
+//          String email = scanner.nextLine();
+//          Customer customer = hotelResource.getCustomer(email);
+//          if (customer == null) {
+//               System.out.println("No customer found with that email. Please create an account first.");
+//               return;
+//          }
+//
+//          System.out.println("Please enter check-in date (MM/dd/yyyy):");
+////          String checkInString = scanner.nextLine();
+////          Date checkIn = parseInputDate(checkInString);
+//          final Date checkIn = enterDate(scanner);
+////          if (checkIn == null) {
+////               System.out.println("Invalid format. Please enter check-in date (MM/dd/yyyy):");
+////               return;
+////          }
+//
+//          System.out.println("Please enter check-out date (MM/dd/yyyy):");
+////          String checkOutString = scanner.nextLine();
+////          Date checkOut = parseInputDate(checkOutString);
+//          final Date checkOut = enterDate(scanner);
+//
+//          Collection<IRoom> availableRooms = hotelResource.findARoom(checkIn, checkOut);
+//          if (availableRooms.isEmpty()) {
+//               System.out.println("Sorry, no rooms are available for the specified dates.");
+//               return;
+//          }
+//
+//          System.out.println("Available Rooms:");
+//          for (IRoom room : availableRooms) {
+//               System.out.println(room.getRoomNumber());
+//          }
+//
+//          System.out.println("Please enter the room number:");
+//          String roomNumber = scanner.nextLine();
+//          IRoom room = hotelResource.getRoom(roomNumber);
+//          if (room == null) {
+//               System.out.println("Invalid room number. Please try again.");
+//               return;
+//          }
+//
+//          Reservation reservation = hotelResource.bookARoom(customer.getEmail(), room, checkIn, checkOut);
+//          System.out.println("Room successfully booked! Room Details: " + reservation);
+//     }
+
      private static void seeMyReservations(Scanner scanner) {
           scanner.nextLine();
-          System.out.print("Enter your email: ");
+          System.out.print("Enter your email: e.g name@domain.com ");
           String email = scanner.nextLine();
           try {
           Collection<Reservation> reservations = hotelResource.getCustomersReservations(email);
@@ -131,7 +328,7 @@ public class MainMenu {
 
      private static void createAnAccount(Scanner scanner) {
           scanner.nextLine();
-          System.out.println("Enter email address:");
+          System.out.println("Enter email address: e.g name@domain.com");
           String email = scanner.nextLine();
           System.out.println("Enter first name:");
           String firstName = scanner.nextLine();

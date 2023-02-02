@@ -47,8 +47,12 @@ public class HotelResource {
         return reservationService.findRooms(checkIn, checkOut);
     }
 
-//    public Collection<IRoom> findAlternativeRooms(final Date checkIn, final Date checkOut) {
-//        return reservationService.findAlternativeRooms(checkIn, checkOut);
-//    }
+    public Date addDefaultPlusDays(final Date date) {
+        return reservationService.addDefaultPlusDays(date);
+    }
+
+    public Collection<IRoom> findAlternativeRooms(final Date checkIn, final Date checkOut) {
+        return reservationService.findAlternativeRooms(checkIn, checkOut);
+    }
 }
 
