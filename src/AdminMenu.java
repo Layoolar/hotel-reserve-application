@@ -9,16 +9,13 @@ import java.util.Collections;
 import java.util.Scanner;
 
 public class AdminMenu {
-    private static Scanner scanner;
-    private static AdminResource adminResource;
-    ;
+//    private static Scanner scanner;
+    private static AdminResource adminResource = AdminResource.getInstance();
 
-    public AdminMenu(AdminResource adminResource, Scanner scanner) {
-        this.adminResource = adminResource.getInstance();
-        this.scanner = scanner;
-    }
 
     public static void showMenu() {
+        int choice;
+        Scanner scanner = new Scanner(System.in);
         while (true) {
             System.out.println("Admin Menu:");
             System.out.println("1. See all Customers");
@@ -27,7 +24,7 @@ public class AdminMenu {
             System.out.println("4. Add a Room");
             System.out.println("5. Back to Main Menu");
 
-            int choice = scanner.nextInt();
+            choice = scanner.nextInt();
             scanner.nextLine();
 
             switch (choice) {
@@ -83,15 +80,13 @@ public class AdminMenu {
         System.out.println("Enter price per night in double format (i.e. 25.00):");
         final double roomPrice = enterRoomPrice(scanner);
 
-        System.out.println("Enter room type: single or double:");
+        System.out.println("Enter room type: 1 for single or 2 for double:");
         final RoomType roomType = enterRoomType(scanner);
 
-        final Room room = new Room(roomNumber, roomPrice, roomType, true);
+        final Room room = new Room(roomNumber, roomPrice, roomType);
 
         adminResource.addRoom(Collections.singletonList(room));
         System.out.println("Room added successfully!");
-
-        System.out.println("Would like to add another room? Y/N");
         showMenu();
     }
 

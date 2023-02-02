@@ -1,5 +1,4 @@
 package model;
-import model.IRoom;
 import model.enumerations.RoomType;
 
 import java.util.Objects;
@@ -10,32 +9,16 @@ public class Room implements IRoom{
     private RoomType roomType;
     private boolean isFree;
 
-    public Room(String roomNumber, double roomPrice, RoomType roomType, boolean isFree) {
+    public Room(String roomNumber, double roomPrice, RoomType roomType) {
         this.roomNumber = roomNumber;
         this.roomPrice = roomPrice;
         this.roomType = roomType;
-        this.isFree = isFree;
     }
-    //implementation of the methods
-    public String getRoomNumber() {
-        return roomNumber;
-    }
-
-    public double getRoomPrice() {
-        return roomPrice;
-    }
-
-    public RoomType getRoomType() {
-        return roomType;
-    }
-
-    public boolean isFree() {
-        return isFree;
-    }
-
+    //impleme
     @Override
     public String toString() {
         return "Room Number: " + roomNumber + ", Room Price: " + roomPrice + ", Room Type: " + roomType + ", isFree: " + isFree;
+
     }
 
     @Override
@@ -55,5 +38,26 @@ public class Room implements IRoom{
         return Objects.equals(roomNumber, other.roomNumber) &&
                 roomPrice == other.roomPrice &&
                 roomType == other.roomType;
+    }
+
+    @Override
+    public String getRoomNumber() {
+        return roomNumber;
+    }
+
+    @Override
+    public double getRoomPrice() {
+        return roomPrice;
+    }
+
+    @Override
+    public RoomType getRoomType() {
+        return roomType;
+    }
+
+    @Override
+    public boolean isFree() {
+        if(roomPrice == 0) { return true; }
+        return false;
     }
 }

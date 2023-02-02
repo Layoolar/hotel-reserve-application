@@ -10,21 +10,19 @@ import java.util.Date;
 import java.util.Scanner;
 
 public class MainMenu {
-     private static final String DATE_FORMAT = "MM/dd/yyyy";
-     private static Scanner scanner;
-     private static HotelResource hotelResource;
-
-     public MainMenu(HotelResource hotelResource) {
-          this.hotelResource = hotelResource.getInstance();
-          this.scanner = new Scanner(System.in);
-     }
 
      public static void main(String[] args) {
-          hotelResource.getInstance();
-          new Scanner(System.in);
-          display();
+          MainMenu.display();
      }
+
+
+     private static final String DATE_FORMAT = "MM/dd/yyyy";
+//     private static Scanner scanner;
+     private static HotelResource hotelResource= HotelResource.getInstance();
+
      public static void display() {
+          int option;
+          Scanner scanner = new Scanner(System.in);
           boolean exit = false;
 
           while (!exit) {
@@ -35,18 +33,18 @@ public class MainMenu {
                System.out.println("4. Admin");
                System.out.println("5. Exit");
 
-               int option = scanner.nextInt();
-               scanner.nextLine();
+               option = scanner.nextInt();
+//               scanner.nextLine();
 
                switch (option) {
                     case 1:
-                         findAndReserveARoom();
+                         findAndReserveARoom(scanner);
                          break;
                     case 2:
-                         seeMyReservations();
+                         seeMyReservations(scanner);
                          break;
                     case 3:
-                         createAnAccount();
+                         createAnAccount(scanner);
                          break;
                     case 4:
                          AdminMenu.showMenu();
@@ -61,7 +59,10 @@ public class MainMenu {
           }
      }
 
-     private static void findAndReserveARoom() {
+
+
+     private static void findAndReserveARoom(Scanner scanner) {
+          scanner.nextLine();
           System.out.println("Please enter your email:");
           String email = scanner.nextLine();
           Customer customer = hotelResource.getCustomer(email);
@@ -70,13 +71,19 @@ public class MainMenu {
                return;
           }
 
-          System.out.println("Please enter check-in date (yyyy-MM-dd):");
-          String checkInString = scanner.nextLine();
-          Date checkIn = parseInputDate(checkInString);
+          System.out.println("Please enter check-in date (MM/dd/yyyy):");
+//          String checkInString = scanner.nextLine();
+//          Date checkIn = parseInputDate(checkInString);
+          final Date checkIn = enterDate(scanner);
+//          if (checkIn == null) {
+//               System.out.println("Invalid format. Please enter check-in date (MM/dd/yyyy):");
+//               return;
+//          }
 
-          System.out.println("Please enter check-out date (yyyy-MM-dd):");
-          String checkOutString = scanner.nextLine();
-          Date checkOut = parseInputDate(checkOutString);
+          System.out.println("Please enter check-out date (MM/dd/yyyy):");
+//          String checkOutString = scanner.nextLine();
+//          Date checkOut = parseInputDate(checkOutString);
+          final Date checkOut = enterDate(scanner);
 
           Collection<IRoom> availableRooms = hotelResource.findARoom(checkIn, checkOut);
           if (availableRooms.isEmpty()) {
@@ -101,9 +108,11 @@ public class MainMenu {
           System.out.println("Room successfully booked! Room Details: " + reservation);
      }
 
-     private static void seeMyReservations() {
+     private static void seeMyReservations(Scanner scanner) {
+          scanner.nextLine();
           System.out.print("Enter your email: ");
           String email = scanner.nextLine();
+          try {
           Collection<Reservation> reservations = hotelResource.getCustomersReservations(email);
           if (reservations.size() > 0) {
                System.out.println("Your reservations:");
@@ -113,9 +122,15 @@ public class MainMenu {
           } else {
                System.out.println("You have no reservations.");
           }
+          } catch (NullPointerException e) {
+//               e.printStackTrace();
+               System.out.println("Email does not exist, Create an account first");
+               display();
+          }
      }
 
-     private static void createAnAccount() {
+     private static void createAnAccount(Scanner scanner) {
+          scanner.nextLine();
           System.out.println("Enter email address:");
           String email = scanner.nextLine();
           System.out.println("Enter first name:");
@@ -123,21 +138,40 @@ public class MainMenu {
           System.out.println("Enter last name:");
           String lastName = scanner.nextLine();
 
-          hotelResource.createACustomer(email, firstName, lastName);
-          System.out.println("Account created successfully!");
-          display();
+          try {
+               hotelResource.createACustomer(firstName, lastName, email);
+               System.out.println("Account created successfully!");
+               display();
+          } catch (IllegalArgumentException e) {
+               System.out.println("Invalid email");
+               display();
+          }
+
      }
 
      private static Date parseInputDate(final String dateString) {
           try {
                return new SimpleDateFormat(DATE_FORMAT).parse(dateString);
           } catch (ParseException e) {
-               e.printStackTrace();
+//               e.printStackTrace();
                return null;
           }
      }
 
+     private static Date enterDate(final Scanner scanner) {
+          try {
+               return new SimpleDateFormat(DATE_FORMAT).parse(scanner.nextLine());
+          } catch (NumberFormatException exp) {
+               System.out.println("Invalid format. Please enter check-in date (MM/dd/yyyy)");
+               return enterDate(scanner);
+          } catch (ParseException e) {
+               System.out.println("Invalid format. Please enter check-in date (MM/dd/yyyy)");
+               return enterDate(scanner);
+          }
+     }
+
 }
+
 
 
 
